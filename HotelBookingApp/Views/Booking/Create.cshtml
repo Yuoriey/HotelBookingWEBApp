@@ -1,0 +1,164 @@
+﻿@model BookingViewModel
+
+<h2>Book Hotel</h2>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card mb-4 border-primary">
+                @if (!string.IsNullOrEmpty(Model.Hotel.Picture))
+                {
+                    <img src="data:image;base64,@Model.Hotel.Picture" alt="@Model.Hotel.Name" class="card-img-top" />
+                }
+                <div class="card-body">
+                    <h4>@Model.Hotel.Name</h4>
+                    <p>@Model.Hotel.Location</p>
+                    <p>Rating: @Model.Hotel.Rating</p>
+                    <div class="form-group">
+                        <label>Check-in Date</label>
+                        <input type="date" class="form-control" asp-for="CheckInDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Check-out Date</label>
+                        <input type="date" class="form-control" asp-for="CheckOutDate" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <form asp-action="Create" method="post">
+                <div class="room-container card shadow-sm mb-4 p-3">
+                    <div class="row">
+                        @foreach (var room in Model.Rooms)
+                        {
+                            <div class="col-md-4 mb-4">
+                                <div class="card room-card" data-price="@room.Price" onclick="selectRoom(this)">
+                                    <div class="image-container">
+                                        @if (!string.IsNullOrEmpty(room.Picture))
+                                        {
+                                            <img src="data:image;base64,@room.Picture" alt="@room.Type" class="card-img-top" />
+                                        }
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title">@room.Type</h5>
+                                        <p class="card-text">Price: $@room.Price per night</p>
+                                        <p class="card-text">Available Rooms: @room.AvailableRooms</p>
+                                        <input type="hidden" name="selectedRooms" value="@room.Type" class="room-checkbox">
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="form-group mt-4">
+                    <label>Total Amount</label>
+                    <input type="text" class="form-control" id="totalAmount" value="@ViewBag.TotalAmount" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Credit Card</label>
+                    <input type="text" id="card-element" class="form-control">
+                </div>
+                <input type="hidden" asp-for="StripeToken" id="stripeToken">
+                <button type="submit" class="btn btn-primary">Book</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    var stripe = Stripe('your-publishable-key');
+    var elements = stripe.elements();
+    var card = elements.create('card');
+    card.mount('#card-element');
+    card.addEventListener('change', function (event) {
+        var displayError = document.getElementById('card-errors');
+        if (event.error) {
+            displayError.textContent = event.error.message;
+        } else {
+            displayError.textContent = '';
+        }
+    });
+
+    function selectRoom(card) {
+        var checkbox = card.querySelector('.room-checkbox');
+        checkbox.checked = !checkbox.checked;
+        if (checkbox.checked) {
+            card.classList.add('border-primary');
+        } else {
+            card.classList.remove('border-primary');
+        }
+        updateTotalAmount();
+    }
+
+    function updateTotalAmount() {
+        var totalAmount = 0;
+        document.querySelectorAll('.room-checkbox:checked').forEach(function (checkbox) {
+            totalAmount += parseFloat(checkbox.closest('.room-card').getAttribute('data-price'));
+        });
+        document.getElementById('totalAmount').value = totalAmount.toFixed(2);
+    }
+</script>
+
+@section Styles {
+    <style>
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            }
+
+        .image-container {
+            height: 200px;
+            overflow: hidden;
+        }
+
+            .image-container img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        .room-container {
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+            .room-container::-webkit-scrollbar {
+                width: 10px;
+            }
+
+            .room-container::-webkit-scrollbar-thumb {
+                background: #888;
+                border-radius: 10px;
+            }
+
+                .room-container::-webkit-scrollbar-thumb:hover {
+                    background: #555;
+                }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .card-text {
+            font-size: 1rem;
+            color: #6c757d;
+        }
+
+        .border-primary {
+            border: 2px solid #007bff !important;
+        }
+    </style>
+}

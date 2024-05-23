@@ -1,0 +1,65 @@
+﻿@model HotelBookingApp.Models.Hotel
+
+<h2>Edit Hotel</h2>
+
+<form asp-action="Edit" enctype="multipart/form-data" method="post">
+    <div class="form-group">
+        <label asp-for="Name" class="control-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Location" class="control-label"></label>
+        <input asp-for="Location" class="form-control" />
+        <span asp-validation-for="Location" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Rating" class="control-label"></label>
+        <input asp-for="Rating" class="form-control" />
+        <span asp-validation-for="Rating" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Picture" class="control-label">Hotel Picture</label>
+        <input type="file" class="form-control" name="hotelPicture" />
+    </div>
+    <div id="roomFields">
+        @foreach (var room in Model.Rooms)
+        {
+            <div class="form-group">
+                <label>Room Type</label>
+                <input type="text" class="form-control" name="roomTypes" value="@room.Type" />
+                <span class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label>Room Price</label>
+                <input type="number" class="form-control" name="roomPrices" value="@room.Price" />
+                <span class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label>Available Rooms</label>
+                <input type="number" class="form-control" name="availableRooms" value="@room.AvailableRooms" />
+                <span class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label>Room Picture</label>
+                <input type="file" class="form-control" name="roomPictures" />
+            </div>
+        }
+    </div>
+    <button type="button" id="addRoom" class="btn btn-secondary">Add Room</button>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<script>
+    document.getElementById('addRoom').addEventListener('click', function () {
+        var roomFields = document.getElementById('roomFields');
+        var newRoom = roomFields.cloneNode(true);
+        roomFields.parentNode.insertBefore(newRoom, roomFields.nextSibling);
+    });
+</script>

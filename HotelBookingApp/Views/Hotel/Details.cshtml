@@ -1,0 +1,58 @@
+﻿@model HotelBookingApp.Models.Hotel
+
+<h2>Hotel Details</h2>
+
+<div>
+    <h4>@Model.Name</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Name
+        </dt>
+        <dd class="col-sm-10">
+            @Model.Name
+        </dd>
+        <dt class="col-sm-2">
+            Location
+        </dt>
+        <dd class="col-sm-10">
+            @Model.Location
+        </dd>
+        <dt class="col-sm-2">
+            Rating
+        </dt>
+        <dd class="col-sm-10">
+            @Model.Rating
+        </dd>
+        <dt class="col-sm-2">
+            Picture
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.Picture != null)
+            {
+                <img src="data:image;base64,@Model.Picture" alt="@Model.Name" class="img-fluid" />
+            }
+        </dd>
+        <dt class="col-sm-2">
+            Rooms
+        </dt>
+        <dd class="col-sm-10">
+            @foreach (var room in Model.Rooms)
+            {
+                <div class="mt-3">
+                    <h5>Type: @room.Type</h5>
+                    <p>Available Rooms: @room.AvailableRooms</p>
+                    <p>Price: $@room.Price</p>
+                    @if (room.Picture != null)
+                    {
+                        <img src="data:image;base64,@room.Picture" alt="@room.Type" class="img-thumbnail" style="max-height: 200px;" />
+                    }
+                </div>
+            }
+        </dd>
+    </dl>
+</div>
+<p>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</p>

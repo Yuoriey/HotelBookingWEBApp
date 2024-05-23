@@ -1,0 +1,10 @@
+﻿@model IEnumerable<HotelBookingApp.Models.Hotel>
+
+@foreach (var hotel in Model)
+{
+    <div>
+        <h3>@hotel.Name</h3>
+        <p>@hotel.Location</p>
+        <a asp-controller="Booking" asp-action="Create" asp-route-hotelId="@hotel.Id" class="btn btn-primary">Book</a>
+    </div>
+}

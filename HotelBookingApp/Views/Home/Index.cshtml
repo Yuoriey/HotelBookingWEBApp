@@ -1,0 +1,81 @@
+﻿@model IEnumerable<HotelBookingApp.Models.Hotel>
+@{
+    ViewData["Title"] = "Home";
+}
+<div class="jumbotron text-center">
+    <h1 class="display-4">Find the Best Hotel Deals</h1>
+    <p class="lead">We compare hotel prices from hundreds of sites to find you the best deals.</p>
+    <hr class="my-4">
+    <form asp-action="Index" method="get" class="form-inline justify-content-center">
+        <div class="form-group mb-2">
+            <label for="searchQuery" class="sr-only">Search Hotels</label>
+            <input type="text" name="searchQuery" class="form-control" placeholder="Search hotels..." />
+        </div>
+        <button type="submit" class="btn btn-primary mb-2 ml-2">Search</button>
+    </form>
+</div>
+<div class="row">
+    @foreach (var hotel in Model)
+    {
+        <div class="col-md-4 mb-3">
+            <div class="card hotel-card">
+                <div class="image-container">
+                    <img class="card-img-top" src="data:image;base64,@hotel.Picture" alt="Hotel Image" />
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">@hotel.Name</h5>
+                    <p class="card-text">@hotel.Location</p>
+                    <p class="card-text">Rating: @hotel.Rating</p>
+                    <p class="card-text">Available Rooms: @hotel.Rooms.Count</p>
+                    <a asp-controller="Booking" asp-action="Create" asp-route-hotelId="@hotel.Id" class="btn btn-primary">Book Now</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Styles {
+    <style>
+        .hotel-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+            .hotel-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            }
+
+        .image-container {
+            height: 200px;
+            overflow: hidden;
+        }
+
+            .image-container img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        .hotel-card .card-body {
+            text-align: center;
+            flex: 1;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .card-text {
+            font-size: 1rem;
+            color: #6c757d;
+        }
+    </style>
+}

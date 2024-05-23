@@ -1,0 +1,39 @@
+﻿@model IEnumerable<HotelBookingApp.Models.Hotel>
+@{
+    ViewData["Title"] = "Hotels";
+}
+<h2>Hotel List</h2>
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New Hotel</a>
+</p>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Rating</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var hotel in Model)
+        {
+            <tr>
+                <td>@hotel.Name</td>
+                <td>@hotel.Location</td>
+                <td>@hotel.Rating</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@hotel.Id" class="btn btn-secondary">Edit</a>
+                    <a asp-action="Details" asp-route-id="@hotel.Id" class="btn btn-info">Details</a>
+                    <form asp-action="Delete" asp-route-id="@hotel.Id" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                    <form asp-action="SetStatus" asp-route-id="@hotel.Id" method="post" class="d-inline">
+                        <input type="hidden" name="isActive" value="@(hotel.IsActive ? "false" : "true")" />
+                        <button type="submit" class="btn btn-warning">@hotel.IsActive ? "Deactivate" : "Activate"</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
