@@ -4,7 +4,7 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-3" id="hotel-details">
             <div class="card mb-4 border-primary">
                 @if (!string.IsNullOrEmpty(Model.Hotel.Picture))
                 {
@@ -14,14 +14,6 @@
                     <h4>@Model.Hotel.Name</h4>
                     <p>@Model.Hotel.Location</p>
                     <p>Rating: @Model.Hotel.Rating</p>
-                    <div class="form-group">
-                        <label>Check-in Date</label>
-                        <input type="date" class="form-control" asp-for="CheckInDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Check-out Date</label>
-                        <input type="date" class="form-control" asp-for="CheckOutDate" required>
-                    </div>
                 </div>
             </div>
         </div>
@@ -50,13 +42,25 @@
                         }
                     </div>
                 </div>
-                <div class="form-group mt-4">
-                    <label>Total Amount</label>
-                    <input type="text" class="form-control" id="totalAmount" value="@ViewBag.TotalAmount" readonly>
+                <div class="form-group mt-4 row align-items-center">
+                    <label for="checkInOutDate" class="col-sm-3 col-form-label">Check-in and Check-out Dates</label>
+                    <div class="col-sm-5">
+                        <input type="text" id="checkInOutDate" class="form-control" readonly>
+                        <input type="hidden" id="checkInDate" asp-for="CheckInDate">
+                        <input type="hidden" id="checkOutDate" asp-for="CheckOutDate">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Credit Card</label>
+                <div class="form-group mt-4 row align-items-center">
+                    <label class="col-sm-3 col-form-label">Total Amount</label>
+                    <div class="col-sm-5">
+                    <input type="text" class="form-control" id="totalAmount" name="TotalAmount" value="@ViewBag.TotalAmount" readonly>
+                    </div>
+                </div>
+                <div class="form-group mt-4 row align-items-center">
+                    <label class="col-sm-3 col-form-label">Credit Card</label>
+                    <div class="col-sm-5">
                     <input type="text" id="card-element" class="form-control">
+                    </div>
                 </div>
                 <input type="hidden" asp-for="StripeToken" id="stripeToken">
                 <button type="submit" class="btn btn-primary">Book</button>
@@ -65,8 +69,35 @@
     </div>
 </div>
 
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<!-- Stripe.js -->
 <script src="https://js.stripe.com/v3/"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/en.js"></script>
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        flatpickr('#checkInOutDate', {
+            mode: 'range',
+            dateFormat: 'D, M/j/y',
+            minDate: 'today',
+            showMonths: 2,
+            onChange: function (selectedDates, dateStr, instance) {
+                if (selectedDates.length === 2) {
+                    var checkInDate = selectedDates[0];
+                    var checkOutDate = selectedDates[1];
+                    document.getElementById('checkInDate').value = checkInDate.toISOString().slice(0, 10);
+                    document.getElementById('checkOutDate').value = checkOutDate.toISOString().slice(0, 10);
+                    instance.close();
+                }
+            }
+        });
+    });
+    document.getElementById('checkInOutDate').addEventListener('click', function () {
+        flatpickrInstance.open();
+    });
+
     var stripe = Stripe('your-publishable-key');
     var elements = stripe.elements();
     var card = elements.create('card');
@@ -93,8 +124,10 @@
 
     function updateTotalAmount() {
         var totalAmount = 0;
-        document.querySelectorAll('.room-checkbox:checked').forEach(function (checkbox) {
-            totalAmount += parseFloat(checkbox.closest('.room-card').getAttribute('data-price'));
+        document.querySelectorAll('.room-checkbox').forEach(function (checkbox) {
+            if (checkbox.checked) {
+                totalAmount += parseFloat(checkbox.closest('.room-card').getAttribute('data-price'));
+            }
         });
         document.getElementById('totalAmount').value = totalAmount.toFixed(2);
     }
@@ -159,6 +192,12 @@
 
         .border-primary {
             border: 2px solid #007bff !important;
+        }
+
+        #hotel-details {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 20px;
         }
     </style>
 }
