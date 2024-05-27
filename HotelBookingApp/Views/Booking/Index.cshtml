@@ -1,10 +1,31 @@
-﻿@model IEnumerable<HotelBookingApp.Models.Hotel>
+﻿@model IEnumerable<Booking>
 
-@foreach (var hotel in Model)
-{
-    <div>
-        <h3>@hotel.Name</h3>
-        <p>@hotel.Location</p>
-        <a asp-controller="Booking" asp-action="Create" asp-route-hotelId="@hotel.Id" class="btn btn-primary">Book</a>
-    </div>
-}
+<h2>Booking List</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Reservation Number</th>
+            <th>Hotel Name</th>
+            <th>Check-in Date</th>
+            <th>Check-out Date</th>
+            <th>Total Amount</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var booking in Model)
+        {
+            <tr>
+                <td>@booking.Id</td>
+                <td>@booking.HotelId</td>
+                <td>@booking.CheckInDate.ToString("MM/dd/yyyy")</td>
+                <td>@booking.CheckOutDate.ToString("MM/dd/yyyy")</td>
+                <td>@booking.TotalAmount.ToString("C")</td>
+                <td>
+                    <a href="@Url.Action("Details", new { id = booking.Id })" class="btn btn-info">View</a>
+                    <a href="@Url.Action("Download", new { id = booking.Id })" class="btn btn-primary">Download PDF</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

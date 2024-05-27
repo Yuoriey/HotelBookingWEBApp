@@ -1,0 +1,109 @@
+﻿@model BookingViewModel
+
+        <div class="modal-body">
+            <div class="container">
+                <div class="row">
+                    <!-- Left Column: Hotel Information and Selected Rooms -->
+                    <div class="col-md-6">
+                        <!-- Hotel Information -->
+                        <div class="container p-3 border rounded shadow-sm mb-4">
+                            <h5>Hotel Information</h5>
+                            <p><strong>Hotel Name:</strong> @Model.Hotel.Name</p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Location:</strong> @Model.Hotel.Location</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Rating:</strong> @Model.Hotel.Rating</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Selected Rooms -->
+                        <div class="container p-3 border rounded shadow-sm">
+                            <h5>Selected Rooms</h5>
+                            <ul>
+                                @foreach (var room in Model.SelectedRooms)
+                                {
+                                    <li>@room.Type - $@room.Price</li>
+                                }
+                            </ul>
+                            <p><strong>Total Amount:</strong> $@Model.TotalAmount</p>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: User Information and Booking Details -->
+                    <div class="col-md-6">
+                        <!-- User Information -->
+                        <div class="container p-3 border rounded shadow-sm mb-4">
+                            <h5>User Information</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>First Name:</strong> @Model.FirstName</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Last Name:</strong> @Model.LastName</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Email:</strong> @Model.Email</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Phone Number:</strong> @Model.PhoneNumber</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Address:</strong> @Model.Address</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>City:</strong> @Model.City</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Zip Code:</strong> @Model.ZipCode</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Country:</strong> @Model.Country</p>
+                                </div>
+                            </div>
+                        </div>
+
+                <input type="hidden" asp-for="Hotel.Name" name="Hotel.Name" value="@Model.Hotel?.Name">
+                <input type="hidden" asp-for="Hotel.Location" name="Hotel.Location" value="@Model.Hotel?.Location">
+                <input type="hidden" asp-for="Hotel.Rating" name="Hotel.Rating" value="@Model.Hotel?.Rating">
+                <input type="hidden" asp-for="Hotel.Picture" name="Hotel.Picture" value="@Model.Hotel?.Picture">
+                        <!-- Booking Details -->
+                        <div class="container p-3 border rounded shadow-sm">
+                            <h5>Booking Details</h5>
+                            <p><strong>Check-in Date:</strong> @Model.CheckInDate.ToString("MM/dd/yyyy")</p>
+                            <p><strong>Check-out Date:</strong> @Model.CheckOutDate.ToString("MM/dd/yyyy")</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+@section Styles {
+    <style>
+
+        .container {
+            background-color: #fff;
+        }
+
+        .border {
+            border: 1px solid #ddd !important;
+        }
+
+        .rounded {
+            border-radius: 8px !important;
+        }
+
+        .shadow-sm {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .p-3 {
+            padding: 1rem !important;
+        }
+
+        .mb-4 {
+            margin-bottom: 1.5rem !important;
+        }
+    </style>
+}

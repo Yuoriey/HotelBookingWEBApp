@@ -1,0 +1,34 @@
+﻿@model BookingViewModel
+
+<h2>Booking Details</h2>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <h4>Hotel Details</h4>
+            <p><strong>Hotel:</strong> @Model.Hotel.Name</p>
+            <p><strong>Location:</strong> @Model.Hotel.Location</p>
+            <p><strong>Rating:</strong> @Model.Hotel.Rating</p>
+            <p><strong>Check-in Date:</strong> @Model.CheckInDate.ToString("ddd, MMM dd, yyyy")</p>
+            <p><strong>Check-out Date:</strong> @Model.CheckOutDate.ToString("ddd, MMM dd, yyyy")</p>
+            <h4>Selected Rooms</h4>
+            <ul>
+                @foreach (var room in Model.Rooms)
+                {
+                    <li>@room.Type - $@room.Price per night</li>
+                }
+            </ul>
+            <p><strong>Total Amount:</strong> $@Model.TotalAmount.ToString("F2")</p>
+        </div>
+        <div class="col-md-6">
+            <h4>User Information</h4>
+            <p><strong>First Name:</strong> @Model.FirstName</p>
+            <p><strong>Last Name:</strong> @Model.LastName</p>
+            <p><strong>Email:</strong> @Model.Email</p>
+            <p><strong>Address:</strong> @Model.Address</p>
+            <p><strong>City:</strong> @Model.City</p>
+            <p><strong>Zip Code:</strong> @Model.ZipCode</p>
+            <p><strong>Country:</strong> @Model.Country</p>
+            <p><strong>Phone Number:</strong> @Model.PhoneNumber</p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,47 @@
+﻿@model BookingViewModel
+
+<form id="userInfoForm" asp-action="ConfirmBooking" method="post">
+    <input type="hidden" asp-for="CheckInDate" />
+    <input type="hidden" asp-for="CheckOutDate" />
+    <input type="hidden" asp-for="TotalAmount" />
+    <input type="hidden" asp-for="HotelId" />
+    @foreach (var room in Model.SelectedRooms)
+    {
+        <input type="hidden" name="SelectedRooms" value="@room.Type" />
+    }
+
+    <div class="mb-3">
+        <label for="FirstName" class="form-label">First Name</label>
+        <input type="text" class="form-control" asp-for="FirstName" required>
+    </div>
+    <div class="mb-3">
+        <label for="LastName" class="form-label">Last Name</label>
+        <input type="text" class="form-control" asp-for="LastName" required>
+    </div>
+    <div class="mb-3">
+        <label for="Address" class="form-label">Address</label>
+        <input type="text" class="form-control" asp-for="Address" required>
+    </div>
+    <div class="mb-3">
+        <label for="City" class="form-label">City</label>
+        <input type="text" class="form-control" asp-for="City" required>
+    </div>
+    <div class="mb-3">
+        <label for="ZipCode" class="form-label">Zip Code</label>
+        <input type="text" class="form-control" asp-for="ZipCode" required>
+    </div>
+    <div class="mb-3">
+        <label for="Country" class="form-label">Country</label>
+        <input type="text" class="form-control" asp-for="Country" required>
+    </div>
+    <div class="mb-3">
+        <label for="Email" class="form-label">Email</label>
+        <input type="email" class="form-control" asp-for="Email" required>
+    </div>
+    <div class="mb-3">
+        <label for="PhoneNumber" class="form-label">Phone Number</label>
+        <input type="text" class="form-control" asp-for="PhoneNumber" required>
+    </div>
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
+    <button type="button" class="btn btn-primary" id="confirmBooking">Next</button>
+</form>

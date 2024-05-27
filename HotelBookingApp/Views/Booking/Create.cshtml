@@ -6,25 +6,25 @@
     <div class="row">
         <div class="col-md-3" id="hotel-details">
             <div class="card mb-4 border-primary">
-                @if (!string.IsNullOrEmpty(Model.Hotel.Picture))
+                @if (Model?.Hotel?.Picture != null)
                 {
                     <img src="data:image;base64,@Model.Hotel.Picture" alt="@Model.Hotel.Name" class="card-img-top" />
                 }
                 <div class="card-body">
-                    <h4>@Model.Hotel.Name</h4>
-                    <p>@Model.Hotel.Location</p>
-                    <p>Rating: @Model.Hotel.Rating</p>
+                    <h4>@Model?.Hotel?.Name</h4>
+                    <p>@Model?.Hotel?.Location</p>
+                    <p>Rating: @Model?.Hotel?.Rating</p>
                 </div>
             </div>
         </div>
         <div class="col-md-9">
-            <form asp-action="Create" method="post">
+            <form id="bookingForm" asp-action="ReviewBooking" method="post">
                 <div class="room-container card shadow-sm mb-4 p-3">
                     <div class="row">
-                        @foreach (var room in Model.Rooms)
+                        @foreach (var room in Model?.Rooms ?? new List<Room>())
                         {
                             <div class="col-md-4 mb-4">
-                                <div class="card room-card" data-price="@room.Price" onclick="selectRoom(this)">
+                                <div class="card room-card" data-price="@room.Price" data-roomtype="@room.Type" onclick="selectRoom(this)">
                                     <div class="image-container">
                                         @if (!string.IsNullOrEmpty(room.Picture))
                                         {
@@ -35,7 +35,7 @@
                                         <h5 class="card-title">@room.Type</h5>
                                         <p class="card-text">Price: $@room.Price per night</p>
                                         <p class="card-text">Available Rooms: @room.AvailableRooms</p>
-                                        <input type="hidden" name="selectedRooms" value="@room.Type" class="room-checkbox">
+                                        <input type="checkbox" id="room-@room.Type" name="SelectedRoomTypes" value="@room.Type" class="room-checkbox" hidden>
                                     </div>
                                 </div>
                             </div>
@@ -53,18 +53,94 @@
                 <div class="form-group mt-4 row align-items-center">
                     <label class="col-sm-3 col-form-label">Total Amount</label>
                     <div class="col-sm-5">
-                    <input type="text" class="form-control" id="totalAmount" name="TotalAmount" value="@ViewBag.TotalAmount" readonly>
+                        <input type="text" class="form-control" id="totalAmount" asp-for="TotalAmount" readonly>
                     </div>
                 </div>
-                <div class="form-group mt-4 row align-items-center">
-                    <label class="col-sm-3 col-form-label">Credit Card</label>
-                    <div class="col-sm-5">
-                    <input type="text" id="card-element" class="form-control">
+
+                <!-- User Information Section -->
+                <div class="container mt-4">
+                    <h4>User Information</h4>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="FirstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" asp-for="FirstName" required>
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="LastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" asp-for="LastName" required>
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="Email" class="form-label">Email</label>
+                            <input type="email" class="form-control" asp-for="Email" required>
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="PhoneNumber" class="form-label">Phone Number</label>
+                            <input type="text" class="form-control" asp-for="PhoneNumber" required>
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="Address" class="form-label">Address</label>
+                            <input type="text" class="form-control" asp-for="Address" required>
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="City" class="form-label">City</label>
+                            <input type="text" class="form-control" asp-for="City" required>
+                            <span asp-validation-for="City" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="ZipCode" class="form-label">Zip Code</label>
+                            <input type="text" class="form-control" asp-for="ZipCode" required>
+                            <span asp-validation-for="ZipCode" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="Country" class="form-label">Country</label>
+                            <input type="text" class="form-control" asp-for="Country" required>
+                            <span asp-validation-for="Country" class="text-danger"></span>
+                        </div>
                     </div>
                 </div>
-                <input type="hidden" asp-for="StripeToken" id="stripeToken">
-                <button type="submit" class="btn btn-primary">Book</button>
+                <!-- End User Information Section -->
+                <!-- Hidden inputs for hotel information -->
+@*                 <input type="hidden" asp-for="HotelId">
+                <input type="hidden" asp-for="@Model.Hotel.Name" />
+                <input type="hidden" asp-for="@Model.Hotel.Location" />
+                <input type="hidden" asp-for="@Model.Hotel.Rating" />
+                <input type="hidden" asp-for="@Model.Hotel.Picture" /> *@
+                <input type="hidden" asp-for="HotelId" name="HotelId" value="@Model.HotelId">
+
+
+                <button type="submit" class="btn btn-primary">Continue</button>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Review Booking Modal -->
+<div class="modal fade" id="reviewBookingModal" tabindex="-1" aria-labelledby="reviewBookingModalLabel" aria-hidden="true">
+    <div class="modal-dialog custom-modal-width">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center w-100">Review Booking</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                <span aria-hidden="true">&times;</span>
+            </div>
+            <div class="modal-body">
+                <!-- Booking review details will be dynamically loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Back</button>
+                <button type="button" class="btn btn-primary" id="confirmBooking">Confirm Booking</button>
+            </div>
         </div>
     </div>
 </div>
@@ -72,12 +148,77 @@
 <!-- Flatpickr CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-<!-- Stripe.js -->
-<script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/en.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    $(document).ready(function () {
+        $('#bookingForm').on('submit', function (e) {
+            e.preventDefault();
+            var formData = $(this).serializeArray();
+
+            var selectedRooms = [];
+            $('.room-checkbox').each(function () {
+                if ($(this).is(':checked')) {
+                    selectedRooms.push($(this).val());
+                }
+            });
+
+            formData.push({ name: 'SelectedRooms', value: selectedRooms });
+
+            $.post('@Url.Action("ReviewBooking", "Booking")', formData)
+                .done(function (data) {
+                    $('#reviewBookingModal .modal-body').html(data);
+                    $('#reviewBookingModal').modal('show');
+                })
+                .fail(function (xhr, status, error) {
+                    console.error('Error while loading review booking modal:', xhr.responseText);
+                    alert('Error while loading review booking modal. Status: ' + status + ' Error: ' + xhr.responseText);
+                });
+        });
+
+        $('#confirmBooking').on('click', function () {
+            var formData = $('#bookingForm').serializeArray();
+
+            var selectedRooms = [];
+            $('.room-checkbox').each(function () {
+                if ($(this).is(':checked')) {
+                    selectedRooms.push($(this).val());
+                }
+            });
+
+            formData.push({ name: 'SelectedRooms', value: selectedRooms });
+
+            $.post('@Url.Action("ConfirmBooking", "Booking")', formData)
+                .done(function (data) {
+                    window.location.href = '@Url.Action("Index", "Home")';
+                })
+                .fail(function (xhr, status, error) {
+                    console.error('Error while confirming booking:', xhr.responseText);
+                    alert('Error while confirming booking. Status: ' + status + ' Error: ' + xhr.responseText);
+                });
+        });
+
+        function selectRoom(card) {
+            var checkbox = card.querySelector('.room-checkbox');
+            checkbox.checked = !checkbox.checked;
+            if (checkbox.checked) {
+                card.classList.add('border-primary');
+            } else {
+                card.classList.remove('border-primary');
+            }
+            updateTotalAmount();
+        }
+
+        function updateTotalAmount() {
+            var totalAmount = 0;
+            document.querySelectorAll('.room-checkbox').forEach(function (checkbox) {
+                if (checkbox.checked) {
+                    totalAmount += parseFloat(checkbox.closest('.room-card').getAttribute('data-price'));
+                }
+            });
+            document.getElementById('totalAmount').value = totalAmount.toFixed(2);
+        }
+
         flatpickr('#checkInOutDate', {
             mode: 'range',
             dateFormat: 'D, M/j/y',
@@ -91,46 +232,18 @@
                     document.getElementById('checkOutDate').value = checkOutDate.toISOString().slice(0, 10);
                     instance.close();
                 }
+            },
+            onClose: function (selectedDates, dateStr, instance) {
+                if (selectedDates.length == 0) {
+                    instance.close();
+                }
             }
         });
-    });
-    document.getElementById('checkInOutDate').addEventListener('click', function () {
-        flatpickrInstance.open();
-    });
 
-    var stripe = Stripe('your-publishable-key');
-    var elements = stripe.elements();
-    var card = elements.create('card');
-    card.mount('#card-element');
-    card.addEventListener('change', function (event) {
-        var displayError = document.getElementById('card-errors');
-        if (event.error) {
-            displayError.textContent = event.error.message;
-        } else {
-            displayError.textContent = '';
-        }
+        // Re-attach selectRoom and updateTotalAmount functions to global scope
+        window.selectRoom = selectRoom;
+        window.updateTotalAmount = updateTotalAmount;
     });
-
-    function selectRoom(card) {
-        var checkbox = card.querySelector('.room-checkbox');
-        checkbox.checked = !checkbox.checked;
-        if (checkbox.checked) {
-            card.classList.add('border-primary');
-        } else {
-            card.classList.remove('border-primary');
-        }
-        updateTotalAmount();
-    }
-
-    function updateTotalAmount() {
-        var totalAmount = 0;
-        document.querySelectorAll('.room-checkbox').forEach(function (checkbox) {
-            if (checkbox.checked) {
-                totalAmount += parseFloat(checkbox.closest('.room-card').getAttribute('data-price'));
-            }
-        });
-        document.getElementById('totalAmount').value = totalAmount.toFixed(2);
-    }
 </script>
 
 @section Styles {
@@ -155,7 +268,7 @@
             .image-container img {
                 width: 100%;
                 height: 100%;
-                object-fit: cover;
+                object-fit: cover.
             }
 
         .room-container {
@@ -177,27 +290,31 @@
             }
 
                 .room-container::-webkit-scrollbar-thumb:hover {
-                    background: #555;
+                    background: #555.
                 }
 
         .card-title {
             font-size: 1.25rem;
-            font-weight: bold;
+            font-weight: bold.
         }
 
         .card-text {
             font-size: 1rem;
-            color: #6c757d;
+            color: #6c757d.
         }
 
         .border-primary {
-            border: 2px solid #007bff !important;
+            border: 2px solid #007bff !important .
         }
 
         #hotel-details {
             position: -webkit-sticky;
             position: sticky;
-            top: 20px;
+            top: 20px.
+        }
+
+        .custom-modal-width {
+            max-width: 70% !important;
         }
     </style>
 }

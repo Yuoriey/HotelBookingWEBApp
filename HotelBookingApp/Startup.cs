@@ -7,6 +7,8 @@ using Microsoft.Extensions.Hosting;
 using HotelBookingApp.Services;
 using HotelBookingApp.Models;
 using Microsoft.AspNetCore.Identity;
+using DinkToPdf;
+using DinkToPdf.Contracts;
 
 public class Startup
 {
@@ -19,6 +21,9 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+
+        services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
+
         services.AddControllersWithViews();
 
         var couchbaseConfig = Configuration.GetSection("Couchbase");
@@ -47,6 +52,7 @@ public class Startup
         services.AddScoped<IHotelService, HotelService>();
         services.AddScoped<IBookingService, BookingService>();
         services.AddScoped<IBookingServiceFactory, BookingServiceFactory>();
+        services.AddScoped<IPaymentService, MockPaymentService>();
 
 
         // Identity configuration
