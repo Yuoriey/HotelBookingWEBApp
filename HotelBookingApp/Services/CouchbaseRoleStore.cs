@@ -80,5 +80,5 @@ public class CouchbaseRoleStore : IRoleStore<IdentityRole>
     public void Dispose()
     {
         // Dispose any resources if needed.
-    }
+        }
 }

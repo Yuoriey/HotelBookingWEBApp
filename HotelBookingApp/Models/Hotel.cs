@@ -16,7 +16,7 @@ namespace HotelBookingApp.Models
         [Range(0, 5)]
         public double Rating { get; set; }
         public string Picture { get; set; } = string.Empty;
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = false;
 
         public List<Room>Rooms { get; set; } = new List<Room>();
     }
@@ -26,10 +26,10 @@ namespace HotelBookingApp.Models
         [Required(ErrorMessage = "The type fiels is required")]
         public string Type { get; set; }
         [Range(0, int.MaxValue, ErrorMessage = "The AvailableRooms field must be a non-negative integer.")]
-        public int AvailableRooms { get; set; }
+        public int AvailableRooms { get; set; } = 0;
         [Range(0, double.MaxValue, ErrorMessage = "The Price field must be a non-negative number.")]
-        public double Price { get; set; }
+        public double Price { get; set; } = 0.0;
         public string Picture { get; set; } = string.Empty;
-        public bool IsAvailable { get; set; }
+        public bool IsAvailable { get; set; } = false;
     }
 }

@@ -1,37 +1,38 @@
 ﻿using HotelBookingApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using DinkToPdf;
-using DinkToPdf.Contracts;
-using Couchbase.Extensions.DependencyInjection;
-using Couchbase.KeyValue;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.IO;
+using DinkToPdf;
+using DinkToPdf.Contracts;
 using HotelBookingApp.Services;
+using Newtonsoft.Json;
 
 [Authorize]
 public class BookingController : Controller
 {
     private readonly IBookingServiceFactory _bookingServiceFactory;
+    private readonly IBookingService _bookingService;
     private readonly IHotelService _hotelService;
-    private readonly IPaymentService _paymentService;
     private readonly IConverter _pdfConverter;
-    private readonly IBucketProvider _bucketProvider;
 
-    public BookingController(IBookingServiceFactory bookingServiceFactory, IHotelService hotelService, IPaymentService paymentService, IConverter pdfConverter, IBucketProvider bucketProvider)
+    public BookingController(IBookingServiceFactory bookingServiceFactory, IHotelService hotelService, IConverter pdfConverter, IBookingService bookingService)
     {
         _bookingServiceFactory = bookingServiceFactory;
+        _bookingService = bookingService;
         _hotelService = hotelService;
-        _paymentService = paymentService;
         _pdfConverter = pdfConverter;
-        _bucketProvider = bucketProvider;
     }
 
     public async Task<IActionResult> Create(string hotelId)
     {
+        if (string.IsNullOrEmpty(hotelId))
+        {
+            return BadRequest("Hotel ID is required.");
+        }
         var bookingService = _bookingServiceFactory.Create("default");
         var hotel = await _hotelService.GetHotelByIdAsync(hotelId);
         if (hotel == null)
@@ -51,7 +52,7 @@ public class BookingController : Controller
     [HttpPost]
     public IActionResult UserInfo(BookingViewModel model)
     {
-        if (ModelState.IsValid)
+        //if (ModelState.IsValid)
         {
             return PartialView("_UserInfoModal", model);
         }
@@ -63,8 +64,25 @@ public class BookingController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> ReviewBooking(BookingViewModel model, List<string> selectedRoomTypes)
+    public async Task<IActionResult> ReviewBooking(BookingViewModel model, string hotelJson, List<string> selectedRoomTypes)
     {
+        // Ensure the hotelJson is not null or empty
+        if (string.IsNullOrEmpty(hotelJson))
+        {
+            ModelState.AddModelError("Hotel", "Hotel information is missing.");
+            return BadRequest(ModelState);
+        }
+
+        // Deserialize hotelJson to Hotel object    
+        model.Hotel = JsonConvert.DeserializeObject<Hotel>(hotelJson);
+
+        // Check if model.Hotel is null after deserialization
+        if (model.Hotel == null)
+        {
+            ModelState.AddModelError("Hotel", "Failed to deserialize hotel information.");
+            return BadRequest(ModelState);
+        }
+
         if (ModelState.IsValid)
         {
             var hotel = await _hotelService.GetHotelByIdAsync(model.HotelId);
@@ -74,86 +92,101 @@ public class BookingController : Controller
                 return BadRequest(ModelState);
             }
 
-            model.Hotel = hotel;
             model.SelectedRooms = hotel.Rooms.Where(r => selectedRoomTypes.Contains(r.Type)).ToList();
 
             return PartialView("_ReviewBookingModal", model);
         }
 
         var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-        Console.WriteLine("ModelState errors: " + string.Join(", ", errors));
-
         return BadRequest(ModelState);
     }
 
-
     [HttpPost]
-    public async Task<IActionResult> ConfirmBooking(BookingViewModel model)
+    public async Task<IActionResult> ConfirmBooking(BookingViewModel model, List<string> selectedRoomTypes, string hotelJson)
     {
-        if (ModelState.IsValid)
+        try
         {
-            if (model.Hotel == null)
+            // Ensure the hotelJson is not null or empty
+            if (string.IsNullOrEmpty(hotelJson))
             {
-                // Log the error
-                Console.WriteLine("Hotel information is missing.");
-                ModelState.AddModelError("", "Hotel information is missing.");
+                ModelState.AddModelError("Hotel", "Hotel information is missing.");
                 return BadRequest(ModelState);
             }
 
-            var booking = new Booking
+            // Deserialize hotelJson to Hotel object
+            model.Hotel = JsonConvert.DeserializeObject<Hotel>(hotelJson);
+
+            // Check if model.Hotel is null after deserialization
+            if (model.Hotel == null)
             {
-                Id = Guid.NewGuid().ToString(),
-                HotelId = model.HotelId,
-                UserId = User.Identity.Name,
-                CheckInDate = model.CheckInDate,
-                CheckOutDate = model.CheckOutDate,
-                TotalAmount = model.TotalAmount,
-                Rooms = model.SelectedRooms,
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                Email = model.Email,
-                Address = model.Address,
-                City = model.City,
-                ZipCode = model.ZipCode,
-                Country = model.Country,
-                PhoneNumber = model.PhoneNumber
-            };
+                ModelState.AddModelError("Hotel", "Failed to deserialize hotel information.");
+                return BadRequest(ModelState);
+            }
 
-            var bookingService = _bookingServiceFactory.Create("default");
-            await bookingService.AddBookingAsync(booking);
+            // Ensure that selectedRoomTypes is not null or empty
+            if (selectedRoomTypes == null || !selectedRoomTypes.Any())
+            {
+                ModelState.AddModelError("Rooms", "No rooms selected.");
+                return BadRequest(ModelState);
+            }
 
-            // Generate a unique reservation number
-            var reservationNumber = GenerateReservationNumber();
-            // Implement method to send confirmation email
-            // await _emailService.SendBookingConfirmationEmail(model.Email, booking, reservationNumber);
+            if (ModelState.IsValid)
+            {
+                model.SelectedRooms = model.Hotel.Rooms.Where(r => selectedRoomTypes.Contains(r.Type)).ToList();
 
-            // Save to "Reservations" scope inside "HotelBookingBucket"
-            await SaveToReservationsScope(booking);
+                var booking = new Booking
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    HotelId = model.Hotel.Id,
+                    Hotel = model.Hotel,
+                    UserId = User.Identity.Name,
+                    CheckInDate = model.CheckInDate,
+                    CheckOutDate = model.CheckOutDate,
+                    TotalAmount = model.TotalAmount,
+                    Rooms = model.SelectedRooms,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    Email = model.Email,
+                    Address = model.Address,
+                    City = model.City,
+                    ZipCode = model.ZipCode,
+                    Country = model.Country,
+                    PhoneNumber = model.PhoneNumber
+                };
 
-            return RedirectToAction("Index", new { success = true });
+                var bookingService = _bookingServiceFactory.Create("default");
+                if (bookingService == null)
+                {
+                    ModelState.AddModelError("", "Booking service could not be resolved.");
+                    return BadRequest(ModelState);
+                }
+
+                await bookingService.AddBookingAsync(booking);
+
+                // Generate a unique reservation number
+                var reservationNumber = GenerateReservationNumber();
+                // Send confirmation email (implementation needed)
+
+                return RedirectToAction("Index", new { success = true });
+            }
+
+            return BadRequest(ModelState);
         }
-
-        // Log the model state errors
-        var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-        Console.WriteLine("ModelState errors: " + string.Join(", ", errors));
-
-        return BadRequest(ModelState);
+        catch (Exception ex)
+        {
+            // Log the exception (add a logger to your controller for better logging)
+            Console.WriteLine("Error in ConfirmBooking: " + ex.Message);
+            ModelState.AddModelError("", "An unexpected error occurred.");
+            return BadRequest(ModelState);
+        }
     }
+
 
 
 
     private string GenerateReservationNumber()
     {
         return DateTime.UtcNow.ToString("yyyyMMddHHmmssfff");
-    }
-
-    private async Task SaveToReservationsScope(Booking booking)
-    {
-        var bucket = await _bucketProvider.GetBucketAsync("HotelBookingBucket");
-        var scope = await bucket.ScopeAsync("Reservations");
-        var collection = await scope.CollectionAsync("bookings");
-
-        var result = await collection.UpsertAsync(booking.Id, booking);
     }
 
     public async Task<IActionResult> Index()
@@ -165,6 +198,11 @@ public class BookingController : Controller
 
     public async Task<IActionResult> Details(string id)
     {
+        if (string.IsNullOrEmpty(id))
+        {
+            return BadRequest("Booking ID is required.");
+        }
+
         var bookingService = _bookingServiceFactory.Create("default");
         var booking = await bookingService.GetBookingByIdAsync(id);
         if (booking == null)
@@ -176,6 +214,11 @@ public class BookingController : Controller
 
     public async Task<IActionResult> Download(string id)
     {
+        if (string.IsNullOrEmpty(id))
+        {
+            return BadRequest("Booking ID is required.");
+        }
+
         var bookingService = _bookingServiceFactory.Create("default");
         var booking = await bookingService.GetBookingByIdAsync(id);
         if (booking == null)

@@ -1,4 +1,7 @@
-﻿@model BookingViewModel
+﻿@using Newtonsoft.Json
+@using HotelBookingApp.Models
+@model BookingViewModel
+
 
 <h2>Book Hotel</h2>
 
@@ -11,6 +14,7 @@
                     <img src="data:image;base64,@Model.Hotel.Picture" alt="@Model.Hotel.Name" class="card-img-top" />
                 }
                 <div class="card-body">
+                    <h4 hidden>@Model?.Hotel.Id</h4>
                     <h4>@Model?.Hotel?.Name</h4>
                     <p>@Model?.Hotel?.Location</p>
                     <p>Rating: @Model?.Hotel?.Rating</p>
@@ -19,6 +23,7 @@
         </div>
         <div class="col-md-9">
             <form id="bookingForm" asp-action="ReviewBooking" method="post">
+                <input type="hidden" asp-for="HotelId" />
                 <div class="room-container card shadow-sm mb-4 p-3">
                     <div class="row">
                         @foreach (var room in Model?.Rooms ?? new List<Room>())
@@ -111,13 +116,14 @@
                 </div>
                 <!-- End User Information Section -->
                 <!-- Hidden inputs for hotel information -->
-@*                 <input type="hidden" asp-for="HotelId">
-                <input type="hidden" asp-for="@Model.Hotel.Name" />
-                <input type="hidden" asp-for="@Model.Hotel.Location" />
-                <input type="hidden" asp-for="@Model.Hotel.Rating" />
-                <input type="hidden" asp-for="@Model.Hotel.Picture" /> *@
                 <input type="hidden" asp-for="HotelId" name="HotelId" value="@Model.HotelId">
+                <input type="hidden" asp-for="Hotel.Name" name="Name" value="Hotel.Name">
+                <input type="hidden" asp-for="Hotel.Location" name="Location" value="Hotel.Location">
+                <input type="hidden" asp-for="Hotel.Rating" name="Rating" value="Hotel.Rating">
 
+
+
+                <input type="hidden" id="HotelJson" name="hotelJson" value='@Html.Raw(JsonConvert.SerializeObject(Model.Hotel))'>
 
                 <button type="submit" class="btn btn-primary">Continue</button>
             </form>
@@ -136,6 +142,7 @@
             </div>
             <div class="modal-body">
                 <!-- Booking review details will be dynamically loaded here -->
+                <div id="reviewBookingContent"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Back</button>
@@ -163,11 +170,13 @@
                 }
             });
 
-            formData.push({ name: 'SelectedRooms', value: selectedRooms });
+            formData.push({ name: 'SelectedRoomTypes', value: selectedRooms });
+            formData.push({ name: 'hotelJson', value: $('#HotelJson').val() });
+
 
             $.post('@Url.Action("ReviewBooking", "Booking")', formData)
                 .done(function (data) {
-                    $('#reviewBookingModal .modal-body').html(data);
+                    $('#reviewBookingContent').html(data);
                     $('#reviewBookingModal').modal('show');
                 })
                 .fail(function (xhr, status, error) {
@@ -186,7 +195,9 @@
                 }
             });
 
-            formData.push({ name: 'SelectedRooms', value: selectedRooms });
+            formData.push({ name: 'SelectedRoomTypes', value: selectedRooms });
+            formData.push({ name: 'hotelJson', value: $('#HotelJson').val() });
+
 
             $.post('@Url.Action("ConfirmBooking", "Booking")', formData)
                 .done(function (data) {
@@ -268,7 +279,7 @@
             .image-container img {
                 width: 100%;
                 height: 100%;
-                object-fit: cover.
+                object-fit: cover;
             }
 
         .room-container {
@@ -290,27 +301,27 @@
             }
 
                 .room-container::-webkit-scrollbar-thumb:hover {
-                    background: #555.
+                    background: #555;
                 }
 
         .card-title {
             font-size: 1.25rem;
-            font-weight: bold.
+            font-weight: bold;
         }
 
         .card-text {
             font-size: 1rem;
-            color: #6c757d.
+            color: #6c757d;
         }
 
         .border-primary {
-            border: 2px solid #007bff !important .
+            border: 2px solid #007bff !important;
         }
 
         #hotel-details {
             position: -webkit-sticky;
             position: sticky;
-            top: 20px.
+            top: 20px;
         }
 
         .custom-modal-width {

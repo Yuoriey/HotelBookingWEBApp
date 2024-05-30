@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<Booking>
 
-<h2>Booking List</h2>
-<table class="table table-striped">
+<h2>Bookings</h2>
+<table class="table">
     <thead>
         <tr>
             <th>Reservation Number</th>
@@ -17,7 +17,7 @@
         {
             <tr>
                 <td>@booking.Id</td>
-                <td>@booking.HotelId</td>
+                <td>@booking.Hotel?.Name</td>
                 <td>@booking.CheckInDate.ToString("MM/dd/yyyy")</td>
                 <td>@booking.CheckOutDate.ToString("MM/dd/yyyy")</td>
                 <td>@booking.TotalAmount.ToString("C")</td>
