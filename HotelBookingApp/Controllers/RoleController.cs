@@ -1,21 +1,28 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using HotelBookingApp.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using System.Linq;
+using Microsoft.Extensions.Logging;
 
 public class RoleController : Controller
 {
     private readonly RoleManager<IdentityRole> _roleManager;
-    private readonly UserManager<IdentityUser> _userManager;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ILogger<RoleController> _logger;
 
-    public RoleController(RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager)
+    public RoleController(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, ILogger<RoleController> logger)
     {
         _roleManager = roleManager;
         _userManager = userManager;
+        _logger = logger;
     }
 
     public IActionResult Index()
     {
-        return View(_roleManager.Roles);
+        var roles =  _roleManager.Roles.ToListAsync();
+        return View(roles);
     }
 
     public IActionResult Create()
@@ -26,14 +33,35 @@ public class RoleController : Controller
     [HttpPost]
     public async Task<IActionResult> Create(string roleName)
     {
-        if (!string.IsNullOrEmpty(roleName))
+        if (string.IsNullOrEmpty(roleName))
         {
-            IdentityResult result = await _roleManager.CreateAsync(new IdentityRole(roleName));
+            ModelState.AddModelError("", "Role name is required.");
+            return View();
+        }
+
+        var roleExist = await _roleManager.RoleExistsAsync(roleName);
+        if (!roleExist)
+        {
+            var result = await _roleManager.CreateAsync(new IdentityRole(roleName));
             if (result.Succeeded)
             {
+                _logger.LogInformation($"Role {roleName} created successfully.");
                 return RedirectToAction("Index");
             }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+                _logger.LogError($"Error creating role: {roleName}. Errors: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
         }
+        else
+        {
+            ModelState.AddModelError("", "Role already exists.");
+        }
+
         return View();
     }
 
@@ -52,7 +80,7 @@ public class RoleController : Controller
         }
 
         var userRoles = await _userManager.GetRolesAsync(user);
-        var roles = _roleManager.Roles;
+        var roles = _roleManager.Roles.ToList(); // Synchronous call
 
         var model = new EditUserRolesViewModel
         {

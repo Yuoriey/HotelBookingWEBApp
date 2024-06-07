@@ -5,10 +5,10 @@
 
 <h2>Book Hotel</h2>
 
-<div class="container">
+<div class="container mt-5">
     <div class="row">
         <div class="col-md-3" id="hotel-details">
-            <div class="card mb-4 border-primary">
+            <div class="card mb-4 border-primary" id="hotel-card">
                 @if (Model?.Hotel?.Picture != null)
                 {
                     <img src="data:image;base64,@Model.Hotel.Picture" alt="@Model.Hotel.Name" class="card-img-top" />
@@ -38,15 +38,27 @@
                                     </div>
                                     <div class="card-body">
                                         <h5 class="card-title">@room.Type</h5>
+                                        <p class="card-text">Guests: @room.NumberOfGuests</p>
                                         <p class="card-text">Price: $@room.Price per night</p>
-                                        <p class="card-text">Available Rooms: @room.AvailableRooms</p>
-                                        <input type="checkbox" id="room-@room.Type" name="SelectedRoomTypes" value="@room.Type" class="room-checkbox" hidden>
+@*                                         <p class="card-text">Available Rooms: @room.AvailableRooms</p>
+ *@                                        @if (room.AvailableRooms > 0)
+                                        {
+                                            <p class="card-text">Available Rooms: @room.AvailableRooms</p>
+                                            <input type="checkbox" id="room-@room.Type" name="SelectedRoomTypes" value="@room.Type" class="room-checkbox" hidden>
+                                            
+                                        }
+                                        else
+                                        {
+                                            <p class="text-danger">Unavailable</p>
+                                        }
                                     </div>
                                 </div>
                             </div>
                         }
                     </div>
                 </div>
+                <div class="booking-details-container mt-4 p-3 border rounded shadow-sm">
+
                 <div class="form-group mt-4 row align-items-center">
                     <label for="checkInOutDate" class="col-sm-3 col-form-label">Check-in and Check-out Dates</label>
                     <div class="col-sm-5">
@@ -61,8 +73,16 @@
                         <input type="text" class="form-control" id="totalAmount" asp-for="TotalAmount" readonly>
                     </div>
                 </div>
-
+                <div class="form-group mt-4 row align-items-center">
+                    <label for="paymentProof" class="col-sm-3 col-form-label">Payment Proof</label>
+                    <div class="col-sm-5">
+                        <input type="file" class="form-control" id="paymentProof" name="paymentProof" accept="image/*" required>
+                    </div>
+                </div>
+                </div>
                 <!-- User Information Section -->
+                <div class="user-information-container mt-4 p-3 border rounded shadow-sm">
+
                 <div class="container mt-4">
                     <h4>User Information</h4>
                     <div class="row">
@@ -114,9 +134,12 @@
                         </div>
                     </div>
                 </div>
+                </div>
                 <!-- End User Information Section -->
                 <!-- Hidden inputs for hotel information -->
                 <input type="hidden" asp-for="HotelId" name="HotelId" value="@Model.HotelId">
+                <input type="hidden" asp-for="UserId" name="UserId" value="@Model.UserId">
+
                 <input type="hidden" asp-for="Hotel.Name" name="Name" value="Hotel.Name">
                 <input type="hidden" asp-for="Hotel.Location" name="Location" value="Hotel.Location">
                 <input type="hidden" asp-for="Hotel.Rating" name="Rating" value="Hotel.Rating">
@@ -136,7 +159,7 @@
     <div class="modal-dialog custom-modal-width">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title text-center w-100">Review Booking</h5>
+                <h5 class="modal-title text-center w-100">Booking Summary</h5>
                 <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
                 <span aria-hidden="true">&times;</span>
             </div>
@@ -152,6 +175,10 @@
     </div>
 </div>
 
+<div id="loadingSpinner" class="spinner-border text-primary" role="status" style="display: none;">
+    <span class="sr-only">Loading...</span>
+</div>
+
 <!-- Flatpickr CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
@@ -161,52 +188,68 @@
     $(document).ready(function () {
         $('#bookingForm').on('submit', function (e) {
             e.preventDefault();
-            var formData = $(this).serializeArray();
+            $('#loadingSpinner').show(); // Show spinner
 
+            var formData = new FormData(this);
             var selectedRooms = [];
             $('.room-checkbox').each(function () {
                 if ($(this).is(':checked')) {
                     selectedRooms.push($(this).val());
                 }
             });
+            formData.append('SelectedRoomTypes', selectedRooms);
+            formData.append('hotelJson', $('#HotelJson').val());
 
-            formData.push({ name: 'SelectedRoomTypes', value: selectedRooms });
-            formData.push({ name: 'hotelJson', value: $('#HotelJson').val() });
-
-
-            $.post('@Url.Action("ReviewBooking", "Booking")', formData)
-                .done(function (data) {
+            $.ajax({
+                url: '@Url.Action("ReviewBooking", "Booking")',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (data) {
                     $('#reviewBookingContent').html(data);
                     $('#reviewBookingModal').modal('show');
-                })
-                .fail(function (xhr, status, error) {
+                    $('#loadingSpinner').hide(); // Hide spinner
+
+                },
+                error: function (xhr, status, error) {
                     console.error('Error while loading review booking modal:', xhr.responseText);
                     alert('Error while loading review booking modal. Status: ' + status + ' Error: ' + xhr.responseText);
-                });
+                    $('#loadingSpinner').hide(); // Hide spinner
+
+                }
+            });
         });
 
         $('#confirmBooking').on('click', function () {
-            var formData = $('#bookingForm').serializeArray();
+            $('#loadingSpinner').show(); // Show spinner
 
+            var formData = new FormData($('#bookingForm')[0]);
             var selectedRooms = [];
             $('.room-checkbox').each(function () {
                 if ($(this).is(':checked')) {
                     selectedRooms.push($(this).val());
                 }
             });
+            formData.append('SelectedRoomTypes', selectedRooms);
+            formData.append('hotelJson', $('#HotelJson').val());
 
-            formData.push({ name: 'SelectedRoomTypes', value: selectedRooms });
-            formData.push({ name: 'hotelJson', value: $('#HotelJson').val() });
-
-
-            $.post('@Url.Action("ConfirmBooking", "Booking")', formData)
-                .done(function (data) {
+            $.ajax({
+                url: '@Url.Action("ConfirmBooking", "Booking")',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (data) {
                     window.location.href = '@Url.Action("Index", "Home")';
-                })
-                .fail(function (xhr, status, error) {
+                },
+                error: function (xhr, status, error) {
                     console.error('Error while confirming booking:', xhr.responseText);
                     alert('Error while confirming booking. Status: ' + status + ' Error: ' + xhr.responseText);
-                });
+                    $('#loadingSpinner').hide(); // Hide spinner
+
+                }
+            });
         });
 
         function selectRoom(card) {
@@ -250,14 +293,26 @@
                 }
             }
         });
+        // var hotelcard = document.getelementbyid('hotel-details');
+        // var initialoffsettop = hotelcard.offsettop;
 
-        // Re-attach selectRoom and updateTotalAmount functions to global scope
+        // window.addeventlistener('scroll', function () {
+        //     var scrolltop = window.pageyoffset || document.documentelement.scrolltop;
+        //     if (scrolltop > initialoffsettop) {
+        //         hotelcard.style.position = 'fixed';
+        //         hotelcard.style.top = '20px';
+        //     } else {
+        //         hotelcard.style.position = 'relative';
+        //         hotelcard.style.top = '0';
+        //     }
+        // });
         window.selectRoom = selectRoom;
         window.updateTotalAmount = updateTotalAmount;
     });
 </script>
 
-@section Styles {
+
+@* @section Styles {
     <style>
         .card {
             border: 1px solid #ddd;
@@ -328,4 +383,4 @@
             max-width: 70% !important;
         }
     </style>
-}
+} *@

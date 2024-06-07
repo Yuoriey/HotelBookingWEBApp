@@ -1,8 +1,12 @@
 ﻿@model HotelBookingApp.Models.Hotel
+@{
+    ViewData["Title"] = "Edit Hotel";
+}
 
 <h2>Edit Hotel</h2>
 
 <form asp-action="Edit" enctype="multipart/form-data" method="post">
+    <input type="hidden" asp-for="Id" />
     <div class="form-group">
         <label asp-for="Name" class="control-label"></label>
         <input asp-for="Name" class="form-control" />
@@ -19,47 +23,110 @@
         <span asp-validation-for="Rating" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="Picture" class="control-label">Hotel Picture</label>
-        <input type="file" class="form-control" name="hotelPicture" />
+        <label>Hotel Picture</label>
+        <img src="data:image;base64,@Model.Picture" alt="@Model.Name" class="img-thumbnail mt-2" style="max-height: 200px;" />
     </div>
+
     <div id="roomFields">
-        @foreach (var room in Model.Rooms)
+        @for (int i = 0; i < Model.Rooms.Count; i++)
         {
             <div class="form-group">
                 <label>Room Type</label>
-                <input type="text" class="form-control" name="roomTypes" value="@room.Type" />
+                <input type="text" class="form-control" name="roomTypes" value="@Model.Rooms[i].Type" />
                 <span class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label>Room Price</label>
-                <input type="number" class="form-control" name="roomPrices" value="@room.Price" />
+                <input type="number" class="form-control" name="roomPrices" value="@Model.Rooms[i].Price" />
                 <span class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label>Available Rooms</label>
-                <input type="number" class="form-control" name="availableRooms" value="@room.AvailableRooms" />
+                <input type="number" class="form-control" name="availableRooms" value="@Model.Rooms[i].AvailableRooms" />
+                <span class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label>Number of Guests</label>
+                <input type="number" class="form-control" name="numberOfGuests" value="@Model.Rooms[i].NumberOfGuests" />
                 <span class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label>Room Picture</label>
-                <input type="file" class="form-control" name="roomPictures" />
+                <img src="data:image;base64,@Model.Rooms[i].Picture" alt="@Model.Rooms[i].Type" class="img-thumbnail mt-2" style="max-height: 200px;" />
             </div>
         }
     </div>
-    <button type="button" id="addRoom" class="btn btn-secondary">Add Room</button>
-    <div class="form-group">
+
+    <div id="newRoomFields">
+        <h4>Add New Rooms</h4>
+        <div class="form-group">
+            <label>Room Type</label>
+            <input type="text" class="form-control" name="newRoomTypes" />
+            <span class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label>Room Price</label>
+            <input type="number" class="form-control" name="newRoomPrices" />
+            <span class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label>Available Rooms</label>
+            <input type="number" class="form-control" name="newAvailableRooms" />
+            <span class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label>Number of Guests</label>
+            <input type="number" class="form-control" name="newNumberOfGuests" />
+            <span class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label>Room Picture</label>
+            <input type="file" class="form-control" name="newRoomPictures" />
+        </div>
+    </div>
+
+    <button type="button" id="addNewRoom" class="btn btn-secondary">Add New Room</button>
+
+    <div class="form-group mt-3">
         <button type="submit" class="btn btn-primary">Save</button>
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+
     </div>
 </form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('addNewRoom').addEventListener('click', function () {
+            var newRoomFields = document.getElementById('newRoomFields');
+            var newRoom = document.createElement('div');
+            newRoom.innerHTML = `
+                        <div class="form-group">
+                            <label>Room Type</label>
+                            <input type="text" class="form-control" name="newRoomTypes" />
+                            <span class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Room Price</label>
+                            <input type="number" class="form-control" name="newRoomPrices" />
+                            <span class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Available Rooms</label>
+                            <input type="number" class="form-control" name="newAvailableRooms" />
+                            <span class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Number of Guests</label>
+                            <input type="number" class="form-control" name="newNumberOfGuests" />
+                            <span class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Room Picture</label>
+                            <input type="file" class="form-control" name="newRoomPictures" />
+                        </div>
+                    `;
+            newRoomFields.appendChild(newRoom);
+        });
+    </script>
 }
-
-<script>
-    document.getElementById('addRoom').addEventListener('click', function () {
-        var roomFields = document.getElementById('roomFields');
-        var newRoom = roomFields.cloneNode(true);
-        roomFields.parentNode.insertBefore(newRoom, roomFields.nextSibling);
-    });
-</script>

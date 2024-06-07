@@ -1,17 +1,23 @@
 ﻿@model IEnumerable<HotelBookingApp.Models.Hotel>
 @{
     ViewData["Title"] = "Hotels";
+    Layout = "~/Views/Shared/_layout.cshtml";
+
 }
 <h2>Hotel List</h2>
+
+<div class="container mt-4">
+
 <p>
     <a asp-action="Create" class="btn btn-primary">Create New Hotel</a>
 </p>
-<table class="table table-striped">
+<table class="table table-striped" id="tbllist">
     <thead>
         <tr>
             <th>Name</th>
             <th>Location</th>
             <th>Rating</th>
+            <th>Status</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -22,18 +28,41 @@
                 <td>@hotel.Name</td>
                 <td>@hotel.Location</td>
                 <td>@hotel.Rating</td>
-                <td>
+                    <td id="status-@hotel.Id">@(hotel.IsActive ? "Active" : "Inactive")</td>
+                    <td>
                     <a asp-action="Edit" asp-route-id="@hotel.Id" class="btn btn-secondary">Edit</a>
                     <a asp-action="Details" asp-route-id="@hotel.Id" class="btn btn-info">Details</a>
                     <form asp-action="Delete" asp-route-id="@hotel.Id" method="post" class="d-inline">
                         <button type="submit" class="btn btn-danger">Delete</button>
                     </form>
-                    <form asp-action="SetStatus" asp-route-id="@hotel.Id" method="post" class="d-inline">
-                        <input type="hidden" name="isActive" value="@(hotel.IsActive ? "false" : "true")" />
-                        <button type="submit" class="btn btn-warning">@hotel.IsActive ? "Deactivate" : "Activate"</button>
-                    </form>
-                </td>
+                        <button type="button" class="btn btn-warning" onclick="toggleStatus('@hotel.Id', '@hotel.IsActive')">@(hotel.IsActive ? "Deactivate" : "Activate")</button>
+
+                    </td>
             </tr>
         }
     </tbody>
 </table>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function toggleStatus(hotelId, isActive) {
+            var newStatus = isActive === "True" ? "false" : "true";
+            $.post('/Hotel/SetStatus', { id: hotelId, isActive: newStatus }, function() {
+                var statusElement = document.getElementById("status-" + hotelId);
+                var button = statusElement.nextElementSibling.querySelector('button.btn-warning');
+                if (newStatus === "true") {
+                    statusElement.innerText = "Active";
+                    button.innerText = "Deactivate";
+                    button.setAttribute("onclick", `toggleStatus('${hotelId}', 'True')`);
+                } else {
+                    statusElement.innerText = "Inactive";
+                    button.innerText = "Activate";
+                    button.setAttribute("onclick", `toggleStatus('${hotelId}', 'False')`);
+                }
+            });
+        }
+    </script>
+}

@@ -1,20 +1,30 @@
-﻿@model IEnumerable<HotelBookingApp.Models.Hotel>
+﻿@model HotelBookingApp.Models.HotelListViewModel
 @{
     ViewData["Title"] = "Home";
 }
-<div class="jumbotron text-center">
+<div class="jumbotron text-center mt-7">
     <h1 class="display-4">Find the Best Hotel Deals</h1>
     <p class="lead">We compare hotel prices from hundreds of sites to find you the best deals.</p>
     <hr class="my-4">
-    <form asp-action="Index" method="get" class="form-inline justify-content-center">
-        <div class="form-group mb-2">
-            <label for="searchQuery" class="sr-only">Search Hotels</label>
-            <input type="text" name="searchQuery" class="form-control" placeholder="Search hotels..." />
-        </div>
-        <button type="submit" class="btn btn-primary mb-2 ml-2">Search</button>
-    </form>
+    <div id="searchContainer">
+        <form asp-action="Index" method="get" class="form-inline justify-content-center">
+            <div class="form-group mb-2">
+                <label for="searchQuery" class="sr-only">Search Hotels</label>
+                <input type="text" name="searchQuery" class="form-control" placeholder="Search hotels..." value="@Model.SearchQuery" />
+            </div>
+            <button type="submit" class="btn btn-primary mb-2 ml-2">Search</button>
+        </form>
+    </div>
 </div>
-<div class="row">
+
+<div id="hotel-list">
+    @await Html.PartialAsync("_HotelListPartial", Model)
+</div>
+
+@* <div class="row">
+    @if (Model.Any())
+    {
+        
     @foreach (var hotel in Model)
     {
         <div class="col-md-4 mb-3">
@@ -26,15 +36,128 @@
                     <h5 class="card-title">@hotel.Name</h5>
                     <p class="card-text">@hotel.Location</p>
                     <p class="card-text">Rating: @hotel.Rating</p>
-                    <p class="card-text">Available Rooms: @hotel.Rooms.Count</p>
-                    <a asp-controller="Booking" asp-action="Create" asp-route-hotelId="@hotel.Id" class="btn btn-primary">Check Availability</a>
+                     @foreach (var room in hotel.Rooms)
+                    {
+                        <p class="card-text">
+                            @room.Type:
+                            @if (room.AvailableRooms > 0)
+                            {
+                                @room.AvailableRooms
+                                
+                            }
+                            else
+                            {
+                                <span class="text-danger">Unavailable</span>
+                            }
+                        </p>
+                    } 
+                     @foreach (var room in hotel.Rooms)
+                        {
+                            <p class="card-text">@room.Type - Available Rooms: @room.AvailableRooms</p>
+                        } 
+                     <p class="card-text">Available Rooms: @hotel.Rooms.Count</p>
+                     <a asp-controller="Booking" asp-action="Create" asp-route-hotelId="@hotel.Id" class="btn btn-primary">Check Availability</a>
                 </div>
             </div>
         </div>
+        }
     }
-</div>
+    else
+    {
+        <div class="col-12">
+            <p class="text-center">No Hotels Found.</p>
+        </div>
+    }
+
+</div> *@
+
+<button onclick="topFunction()" id="scrollTopBtn" title="Go to top">↑</button>
+@section Scripts {
+
+    <script>
+
+
+        // Get the button
+        var mybutton = document.getElementById("scrollTopBtn");
+
+        // When the user scrolls down 20px from the top of the document, show the button
+        window.onscroll = function () { scrollFunction() };
+
+        function scrollFunction() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                mybutton.style.display = "block";
+            } else {
+                mybutton.style.display = "none";
+            }
+            // Sticky search form
+            var searchContainer = document.getElementById("searchContainer");
+            var navbar = document.querySelector('.navbar');
+            var jumbotron = document.querySelector('.jumbotron');
+            var navbarHeight = navbar.offsetHeight;
+            var jumbotronBottom = jumbotron.offsetTop + jumbotron.offsetHeight;
+
+            if (window.pageYOffset > jumbotronBottom - navbarHeight) {
+                searchContainer.classList.add("sticky-search");
+            } else {
+                searchContainer.classList.remove("sticky-search");
+            }
+        }
+
+        // When the user clicks on the button, scroll to the top of the document
+        function topFunction() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.loadPage = function (page) {
+            var searchQuery = $("input[name='searchQuery']").val();
+            $.get("@Url.Action("LoadHotels", "Home")", { searchQuery: searchQuery, page: page }, function (data) {
+                $("#hotel-list").html(data);
+                topFunction(); // Scroll to top after loading new page
+            });
+        }
+    </script>
+}
+
 
 @section Styles {
+
+    <style>
+        #scrollTopBtn {
+            display: none; /* Hidden by default */
+            position: fixed; /* Fixed/sticky position */
+            bottom: 20px; /* Place the button at the bottom of the page */
+            right: 30px; /* Place the button 30px from the right */
+            z-index: 99; /* Make sure it does not overlap */
+            border: none; /* Remove borders */
+            outline: none; /* Remove outline */
+            background-color: #007bff; /* Set a background color */
+            color: white; /* Text color */
+            cursor: pointer; /* Add a mouse pointer on hover */
+            padding: 15px; /* Some padding */
+            border-radius: 10px; /* Rounded corners */
+            font-size: 18px; /* Increase font size */
+        }
+
+            #scrollTopBtn:hover {
+                background-color: #555; /* Add a dark-grey background on hover */
+            }
+        /* Sticky Search Form */
+        .sticky-search {
+            position: fixed;
+            top: 50px; /* Adjust based on the navbar height */
+            width: 69%;
+            z-index: 1020;
+            background-color: #3E362E;
+            padding: 5px;
+            border-radius: 10px; /* Rounded corners */
+
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.5s ease-in-out; /* Smooth transition */
+        }
+
+    </style>
+}
+@* @section Styles {
     <style>
         .hotel-card {
             border: 1px solid #ddd;
@@ -78,4 +201,4 @@
             color: #6c757d;
         }
     </style>
-}
+} *@

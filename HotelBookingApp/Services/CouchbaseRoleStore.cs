@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Couchbase;
+using Couchbase.Extensions.DependencyInjection;
 using Couchbase.KeyValue;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Couchbase.Extensions.DependencyInjection;
+using System.Collections.Generic;
+using System;
 
-public class CouchbaseRoleStore : IRoleStore<IdentityRole>
+public class CouchbaseRoleStore : IRoleStore<IdentityRole>, IQueryableRoleStore<IdentityRole>
 {
     private readonly IBucketProvider _bucketProvider;
     private readonly IBucket _bucket;
@@ -15,8 +18,10 @@ public class CouchbaseRoleStore : IRoleStore<IdentityRole>
     {
         _bucketProvider = bucketProvider;
         _bucket = _bucketProvider.GetBucketAsync("HotelBookingBucket").Result;
-        _collection = _bucket.DefaultCollection();
+        _collection = _bucket.Scope("identityScope").Collection("roles");
     }
+
+    public IQueryable<IdentityRole> Roles => GetAllRolesAsync().Result.AsQueryable();
 
     public async Task<IdentityResult> CreateAsync(IdentityRole role, CancellationToken cancellationToken)
     {
@@ -38,10 +43,10 @@ public class CouchbaseRoleStore : IRoleStore<IdentityRole>
 
     public async Task<IdentityRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
     {
-        var query = $"SELECT * FROM `HotelBookingBucket` WHERE LOWER(name) = '{normalizedRoleName.ToLower()}' LIMIT 1";
-        var result = await _bucket.Cluster.QueryAsync<IdentityRole>(query);
-        var role = await result.FirstAsync();
-        return role;
+        var query = $"SELECT * FROM `HotelBookingBucket`.`identityScope`.`roles` WHERE LOWER(name) = '{normalizedRoleName.ToLower()}' LIMIT 1";
+        var result = await _bucket.Cluster.QueryAsync<dynamic>(query);
+        var role = await result.Rows.FirstOrDefaultAsync();
+        return role?.roles.ToObject<IdentityRole>();
     }
 
     public Task<string> GetNormalizedRoleNameAsync(IdentityRole role, CancellationToken cancellationToken)
@@ -80,5 +85,18 @@ public class CouchbaseRoleStore : IRoleStore<IdentityRole>
     public void Dispose()
     {
         // Dispose any resources if needed.
-        }
+    }
+
+    private async Task<IEnumerable<IdentityRole>> GetAllRolesAsync()
+    {
+        var query = $"SELECT META().id, * FROM `HotelBookingBucket`.`identityScope`.`roles`";
+        var result = await _bucket.Cluster.QueryAsync<dynamic>(query);
+        var roles = await result.Rows.ToListAsync();
+
+        return roles.Select(row => new IdentityRole
+        {
+            Id = row.id,
+            Name = row.name
+        });
+    }
 }

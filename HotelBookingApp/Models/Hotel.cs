@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿    using System.ComponentModel.DataAnnotations;
 
 namespace HotelBookingApp.Models
 {
@@ -31,5 +31,7 @@ namespace HotelBookingApp.Models
         public double Price { get; set; } = 0.0;
         public string Picture { get; set; } = string.Empty;
         public bool IsAvailable { get; set; } = false;
+        [Range(1, int.MaxValue, ErrorMessage = "The NumberOfGuests field must be a positive integer.")]
+        public int NumberOfGuests { get; set; } = 1;
     }
 }

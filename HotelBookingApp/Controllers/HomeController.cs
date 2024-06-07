@@ -14,7 +14,19 @@ public class HomeController : Controller
         _hotelService = hotelService;
     }
 
-    public async Task<IActionResult> Index(string searchQuery)
+    public async Task<IActionResult> Index(string searchQuery, int page = 1, int pageSize = 9)
+    {
+        var model = await GetPaginatedHotels(searchQuery, page, pageSize);
+        return View(model);
+    }
+
+    public async Task<IActionResult> LoadHotels(string searchQuery, int page = 1, int pageSize = 9)
+    {
+        var model = await GetPaginatedHotels(searchQuery, page, pageSize);
+        return PartialView("_HotelListPartial", model);
+    }
+
+    private async Task<HotelListViewModel> GetPaginatedHotels(string searchQuery, int page, int pageSize)
     {
         IEnumerable<Hotel> hotels;
 
@@ -30,17 +42,17 @@ public class HomeController : Controller
         // Filter active hotels
         hotels = hotels.Where(h => h.IsActive);
 
-        return View(hotels);
-    }
+        // Pagination
+        var paginatedHotels = hotels.Skip((page - 1) * pageSize).Take(pageSize);
+        var totalHotels = hotels.Count();
+        var totalPages = (int)Math.Ceiling(totalHotels / (double)pageSize);
 
-    [HttpPost]
-    public async Task<IActionResult> Search(string searchQuery)
-    {
-        var hotels = await _hotelService.SearchHotelsAsync(searchQuery);
-
-        // Filter active hotels
-        hotels = hotels.Where(h => h.IsActive);
-
-        return PartialView("_HotelListPartial", hotels);
+        return new HotelListViewModel
+        {
+            Hotels = paginatedHotels,
+            CurrentPage = page,
+            TotalPages = totalPages,
+            SearchQuery = searchQuery
+        };
     }
 }

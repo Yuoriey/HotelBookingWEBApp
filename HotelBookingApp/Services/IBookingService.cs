@@ -11,5 +11,6 @@ namespace HotelBookingApp.Services
         Task<IEnumerable<Booking>> GetAllBookingsAsync();
         Task UpdateBookingAsync(Booking booking);
         Task DeleteBookingAsync(string id);
+        Task<IEnumerable<Booking>> GetBookingsByUserAsync(string userId);
     }
 }

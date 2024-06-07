@@ -53,6 +53,8 @@ public class Startup
         services.AddScoped<IBookingService, BookingService>();
         services.AddScoped<IBookingServiceFactory, BookingServiceFactory>();
         services.AddScoped<IPaymentService, MockPaymentService>();
+        services.AddTransient<IUserStore<ApplicationUser>, CouchbaseUserStore>();
+        services.AddTransient<IRoleStore<IdentityRole>, CouchbaseRoleStore>();
 
 
         // Identity configuration
@@ -80,7 +82,7 @@ public class Startup
         });
     }
 
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ICouchbaseLifetimeService couchbaseLifetimeService)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ICouchbaseLifetimeService couchbaseLifetimeService, RoleManager<IdentityRole> roleManager)
     {
         app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
@@ -119,5 +121,20 @@ public class Startup
             Configuration["Couchbase:BucketName"]);
 
         couchbaseSetup.SetupCouchbaseAsync().Wait();
+
+        EnsureRolesAsync(roleManager).Wait();
+
+    }
+
+    private async Task EnsureRolesAsync(RoleManager<IdentityRole> roleManager)
+    {
+        string[] roleNames = { "Admin", "User" };
+        foreach (var roleName in roleNames)
+        {
+            if (!await roleManager.RoleExistsAsync(roleName))
+            {
+                await roleManager.CreateAsync(new IdentityRole(roleName));
+            }
+        }
     }
 }

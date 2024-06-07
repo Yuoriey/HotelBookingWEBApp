@@ -30,7 +30,7 @@
         <dd class="col-sm-10">
             @if (Model.Picture != null)
             {
-                <img src="data:image;base64,@Model.Picture" alt="@Model.Name" class="img-fluid" />
+                <img src="data:image;base64,@Model.Picture" alt="@Model.Name" class="img-thumbnail" />
             }
         </dd>
         <dt class="col-sm-2">
@@ -43,6 +43,7 @@
                     <h5>Type: @room.Type</h5>
                     <p>Available Rooms: @room.AvailableRooms</p>
                     <p>Price: $@room.Price</p>
+                    <p>Number of Guests: @room.NumberOfGuests</p>
                     @if (room.Picture != null)
                     {
                         <img src="data:image;base64,@room.Picture" alt="@room.Type" class="img-thumbnail" style="max-height: 200px;" />

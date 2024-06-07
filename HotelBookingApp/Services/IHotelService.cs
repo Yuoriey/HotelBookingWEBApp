@@ -13,5 +13,7 @@ namespace HotelBookingApp.Services
         Task UpdateHotelAsync(Hotel hotel);
         Task DeleteHotelAsync(string id);
         Task SetHotelStatusAsync(string id, bool isActive);
+        Task<Room> GetRoomByTypeAsync(string hotelId, string roomType);
+
     }
 }

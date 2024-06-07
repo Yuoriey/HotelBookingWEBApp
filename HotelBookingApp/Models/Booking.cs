@@ -12,7 +12,7 @@ public class Booking
     public string Id { get; set; }
     public string HotelId { get; set; }
     public virtual Hotel? Hotel { get; set; }
-    public string UserId { get; set; }
+    public string? UserId { get; set; }
     public DateTime CheckInDate { get; set; }
     public DateTime CheckOutDate { get; set; }
     public decimal TotalAmount { get; set; }
@@ -27,6 +27,7 @@ public class Booking
         public string ZipCode { get; set; }
         public string Country { get; set; }
         public string PhoneNumber { get; set; }
+        public byte[] PaymentProof {  get; set; }
     }
 
 }

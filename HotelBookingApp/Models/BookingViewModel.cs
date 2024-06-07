@@ -24,6 +24,7 @@ public class BookingViewModel
     [Required]
     [Phone]
     public string PhoneNumber { get; set; }
+    public string? UserId { get; set; }
     [Required]
     public string HotelId { get; set; }
     public virtual Hotel? Hotel { get; set; }
@@ -34,6 +35,8 @@ public class BookingViewModel
     [DataType(DataType.Date)]
     public DateTime CheckOutDate { get; set; }
     public decimal TotalAmount { get; set; }
+    [Required]
+    public IFormFile? PaymentProof { get; set; }
     public List<Room> SelectedRooms { get; set; } = new List<Room>();
     public List<Room> Rooms { get; set; } = new List<Room>();
 }

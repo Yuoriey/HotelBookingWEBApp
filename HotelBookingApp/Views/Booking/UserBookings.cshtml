@@ -1,0 +1,46 @@
+﻿@model IEnumerable<HotelBookingApp.Models.Booking>
+
+@{
+    ViewData["Title"] = "My Bookings";
+    Layout = "~/Views/Shared/_layout.cshtml";
+}
+
+<h2>My Bookings</h2>
+<div class="container mt-4">
+
+<table class="table table-striped" id="tbllist">
+    <thead>
+        <tr>
+            <th>Hotel Name</th>
+            <th>Room Type(s)</th>
+            <th>Check-In Date</th>
+            <th>Check-Out Date</th>
+            <th>Total Amount</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var booking in Model)
+        {
+            <tr>
+                <td>@booking.Hotel.Name</td>
+                <td>
+                    @foreach (var room in booking.Rooms)
+                    {
+                        <div>@room.Type</div>
+                    }
+                </td>
+                <td>@booking.CheckInDate.ToString("d")</td>
+                <td>@booking.CheckOutDate.ToString("d")</td>
+                <td>@booking.TotalAmount.ToString("C")</td>
+                <td>
+                    <a asp-action="BookingDetails" asp-route-id="@booking.Id" class="btn btn-info">View</a>
+                    <a href="@Url.Action("Download", new { id = booking.Id })" class="btn btn-primary">Download PDF</a>
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+</div>

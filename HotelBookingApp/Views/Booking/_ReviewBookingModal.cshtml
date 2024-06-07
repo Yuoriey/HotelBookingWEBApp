@@ -25,6 +25,7 @@
                                 @foreach (var room in Model.SelectedRooms)
                                 {
                                     <li>@room.Type - $@room.Price</li>
+                                    <li>Guests - @room.NumberOfGuests</li>
                                 }
                             </ul>
                             <p><strong>Total Amount:</strong> $@Model.TotalAmount</p>
@@ -67,14 +68,24 @@
                         <div class="container p-3 border rounded shadow-sm">
                             <h5>Booking Details</h5>
                             <p><strong>Check-in Date:</strong> @Model.CheckInDate.ToString("MM/dd/yyyy")</p>
-                            <p><strong>Check-out Date:</strong> @Model.CheckOutDate.ToString("MM/dd/yyyy")</p>
+                            <p><strong>Check-out Date:</strong> @Model.CheckOutDate.ToString("MM/dd/yyyy")</p
                         </div>
+                            @if (ViewData["PaymentProofBase64"] != null)
+                            {
+                                <div class="container p-3 border rounded shadow-sm mt-4">
+                                    <h5>Proof of Payment</h5>
+                                    <img src="data:image/jpeg;base64,@ViewData["PaymentProofBase64"]" alt="Payment Proof" class="img-fluid"/>
+                                </div>
+                            }
                     </div>
                 </div>
             </div>
         </div>
 
-@section Styles {
+        <div id="loadingSpinner" class="spinner-border text-primary" role="status" style="display: none;">
+    <span class="sr-only">Loading...</span>
+</div>
+@* @section Styles {
     <style>
 
         .container {
@@ -101,4 +112,4 @@
             margin-bottom: 1.5rem !important;
         }
     </style>
-}
+} *@

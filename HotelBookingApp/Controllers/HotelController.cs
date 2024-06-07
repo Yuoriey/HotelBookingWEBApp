@@ -39,7 +39,7 @@ public class HotelController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(Hotel hotel, IFormFile hotelPicture, List<IFormFile> roomPictures, List<string> roomTypes, List<double> roomPrices, List<int> availableRooms)
+    public async Task<IActionResult> Create(Hotel hotel, IFormFile hotelPicture, List<IFormFile> roomPictures, List<string> roomTypes, List<double> roomPrices, List<int> availableRooms, List<int> numberOfGuests)
     {
         hotel.IsActive = true;
         hotel.Id = Guid.NewGuid().ToString();
@@ -58,6 +58,7 @@ public class HotelController : Controller
                 Type = roomTypes[i],
                 Price = roomPrices[i],
                 AvailableRooms = availableRooms[i],
+                NumberOfGuests = numberOfGuests[i],
                 IsAvailable = true
             };
 
@@ -76,6 +77,7 @@ public class HotelController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpGet]
     public async Task<IActionResult> Edit(string id)
     {
         var hotel = await _hotelService.GetHotelByIdAsync(id);
@@ -87,44 +89,71 @@ public class HotelController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Edit(Hotel hotel, IFormFile hotelPicture, List<IFormFile> roomPictures, List<string> roomTypes, List<double> roomPrices, List<int> availableRooms, List<bool> roomAvailabilities)
+    public async Task<IActionResult> Edit(
+        Hotel hotel,
+        List<string> roomTypes,
+        List<double> roomPrices,
+        List<int> availableRooms,
+        List<int> numberOfGuests,
+        List<IFormFile> newRoomPictures,
+        List<string> newRoomTypes,
+        List<double> newRoomPrices,
+        List<int> newAvailableRooms,
+        List<int> newNumberOfGuests)
     {
         if (ModelState.IsValid)
         {
-            if (hotelPicture != null && hotelPicture.Length > 0)
+            var existingHotel = await _hotelService.GetHotelByIdAsync(hotel.Id);
+            if (existingHotel == null)
             {
-                using var stream = new MemoryStream();
-                await hotelPicture.CopyToAsync(stream);
-                hotel.Picture = Convert.ToBase64String(stream.ToArray());
+                return NotFound();
             }
 
-            hotel.Rooms.Clear();
+            // Update hotel details
+            existingHotel.Name = hotel.Name;
+            existingHotel.Location = hotel.Location;
+            existingHotel.Rating = hotel.Rating;
 
-            for (int i = 0; i < roomTypes.Count; i++)
+            // Update existing rooms
+            for (int i = 0; i < existingHotel.Rooms.Count; i++)
+            {
+                existingHotel.Rooms[i].Type = roomTypes[i];
+                existingHotel.Rooms[i].Price = roomPrices[i];
+                existingHotel.Rooms[i].AvailableRooms = availableRooms[i];
+                existingHotel.Rooms[i].NumberOfGuests = numberOfGuests[i];
+            }
+
+            // Add new rooms
+            for (int i = 0; i < newRoomTypes.Count; i++)
             {
                 var room = new Room
                 {
-                    Type = roomTypes[i],
-                    Price = roomPrices[i],
-                    AvailableRooms = availableRooms[i],
-                    IsAvailable = roomAvailabilities[i]
+                    Type = newRoomTypes[i],
+                    Price = newRoomPrices[i],
+                    AvailableRooms = newAvailableRooms[i],
+                    NumberOfGuests = newNumberOfGuests[i],
+                    IsAvailable = true
                 };
 
-                if (i < roomPictures.Count && roomPictures[i] != null && roomPictures[i].Length > 0)
+                if (i < newRoomPictures.Count && newRoomPictures[i] != null && newRoomPictures[i].Length > 0)
                 {
                     using var stream = new MemoryStream();
-                    await roomPictures[i].CopyToAsync(stream);
+                    await newRoomPictures[i].CopyToAsync(stream);
                     room.Picture = Convert.ToBase64String(stream.ToArray());
                 }
 
-                hotel.Rooms.Add(room);
+                existingHotel.Rooms.Add(room);
             }
 
-            await _hotelService.UpdateHotelAsync(hotel);
+            await _hotelService.UpdateHotelAsync(existingHotel);
             return RedirectToAction(nameof(Index));
         }
         return View(hotel);
     }
+
+
+
+
 
     public async Task<IActionResult> Delete(string id)
     {
@@ -149,4 +178,5 @@ public class HotelController : Controller
         await _hotelService.SetHotelStatusAsync(id, isActive);
         return RedirectToAction(nameof(Index));
     }
+
 }

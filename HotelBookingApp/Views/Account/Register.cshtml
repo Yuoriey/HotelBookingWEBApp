@@ -1,20 +1,66 @@
 ﻿@model RegisterViewModel
 
-<form asp-action="Register">
-    <div class="form-group">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card mt-5" style="color: #3E362E;" >
+                <div class="card-header text-center" style="background-color: transparent; border-bottom: none;">
+                    <h4 style="color: #3E362E;">Register</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Register">
+                        <div class="form-group">
+                            <label asp-for="Email" class="form-label" style="color: #3E362E;"></label>
+                            <input asp-for="Email" class="form-control" style="border-color: #865D36;" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Password" class="form-label" style="color: #3E362E;"></label>
+                            <input asp-for="Password" class="form-control" type="password" style="border-color: #865D36;" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="ConfirmPassword" class="form-label" style="color: #3E362E;"></label>
+                            <input asp-for="ConfirmPassword" class="form-control" type="password" style="border-color: #865D36;" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block" style="background-color: #865D36; border-color: #865D36;">Register</button>
+                    </form>
+                </div>
+                <div class="card-footer text-center" style="background-color: transparent; border-top: none;">
+                    <p style="color: #3E362E;">Already have an account? <a asp-controller="Account" asp-action="Login" style="color: #865D36;">Login</a></p>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="form-group">
-        <label asp-for="Password"></label>
-        <input asp-for="Password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="ConfirmPassword"></label>
-        <input asp-for="ConfirmPassword" class="form-control" />
-        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-    </div>
-    <button type="submit" class="btn btn-primary">Register</button>
-</form>
+</div>
+
+@section Styles {
+    <style>
+        .container {
+            margin-top: 50px;
+        }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-label {
+            font-weight: bold;
+        }
+
+        .form-control {
+            border-width: 2px;
+        }
+
+        .btn-primary {
+            font-weight: bold;
+        }
+
+            .btn-primary:hover {
+                background-color: #93785B;
+                border-color: #93785B;
+            }
+    </style>
+}

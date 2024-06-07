@@ -94,5 +94,20 @@ namespace HotelBookingApp.Services
                 await bucket.Collections.CreateCollectionAsync(new CollectionSpec(_scopeName, _collectionName));
             }
         }
+        public async Task<IEnumerable<Booking>> GetBookingsByUserAsync(string userId)
+        {
+            var bucket = await _bucketProvider.GetBucketAsync();
+            var query = $"SELECT b.* FROM `{_bucketName}`.`{_scopeName}`.`{_collectionName}` b WHERE b.userId = '{userId}'";
+            var result = await bucket.Cluster.QueryAsync<Booking>(query);
+
+            var bookings = new List<Booking>();
+            await foreach (var row in result.Rows)
+            {
+                bookings.Add(row);
+            }
+
+            return bookings;
+        }
+
     }
 }

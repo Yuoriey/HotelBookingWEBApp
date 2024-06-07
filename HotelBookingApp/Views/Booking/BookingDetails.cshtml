@@ -1,6 +1,11 @@
 ﻿@model HotelBookingApp.Models.Booking
 
+@{
+    ViewData["Title"] = "Booking Details";
+}
+
 <h2>Booking Summary</h2>
+
 <div class="container mt-4">
                 <div class="row">
                     <!-- Left Column: Hotel Information and Selected Rooms -->
@@ -80,5 +85,4 @@
                     </div>
                 </div>
             </div>
-            <a asp-action="Index" class="btn btn-primary">Back to Bookings</a>
-
+<a asp-action="UserBookings" class="btn btn-primary">Back to My Bookings</a>

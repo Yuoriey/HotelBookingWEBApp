@@ -1,10 +1,19 @@
-﻿@model IEnumerable<Booking>
+﻿@model IEnumerable<HotelBookingApp.Models.Booking>
+
+@{
+    ViewData["Title"] = "Bookings";
+    Layout = "~/Views/Shared/_layout.cshtml";
+}
 
 <h2>Bookings</h2>
-<table class="table">
+
+<div class="container mt-4">
+
+<table class="table" id="tbllist">
     <thead>
         <tr>
-            <th>Reservation Number</th>
+@*             <th>Reservation Number</th>
+ *@            <th>Booked Name</th>
             <th>Hotel Name</th>
             <th>Check-in Date</th>
             <th>Check-out Date</th>
@@ -16,16 +25,19 @@
         @foreach (var booking in Model)
         {
             <tr>
-                <td>@booking.Id</td>
+@*                 <td>@booking.Id</td>
+ *@                <td>@booking.LastName</td>
                 <td>@booking.Hotel?.Name</td>
                 <td>@booking.CheckInDate.ToString("MM/dd/yyyy")</td>
                 <td>@booking.CheckOutDate.ToString("MM/dd/yyyy")</td>
                 <td>@booking.TotalAmount.ToString("C")</td>
                 <td>
-                    <a href="@Url.Action("Details", new { id = booking.Id })" class="btn btn-info">View</a>
+                    <a asp-controller="Booking" asp-action="Details" asp-route-id="@booking.Id" class="btn btn-info">View</a>
                     <a href="@Url.Action("Download", new { id = booking.Id })" class="btn btn-primary">Download PDF</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+</div>
