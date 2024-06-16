@@ -41,3 +41,14 @@
 </table>
 
 </div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#tbllist').DataTable({
+            dom: 'Bfrtip',
+            buttons: [
+                'print', 'pdf'
+            ],
+            "pageLength": 10,
+        });
+    });
+</script>

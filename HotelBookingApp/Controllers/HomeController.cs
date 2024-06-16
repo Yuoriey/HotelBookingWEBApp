@@ -55,4 +55,9 @@ public class HomeController : Controller
             SearchQuery = searchQuery
         };
     }
+
+    public IActionResult Privacy()
+    {
+        return View();
+    }
 }

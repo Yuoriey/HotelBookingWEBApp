@@ -46,7 +46,17 @@
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#tbllist').DataTable({
+                dom: 'Bfrtip',
+                buttons: [
+                    'print', 'pdf'
+                ],
+                "pageLength": 10,
+            });
+        });
+    </script>
     <script>
         function toggleStatus(hotelId, isActive) {
             var newStatus = isActive === "True" ? "false" : "true";

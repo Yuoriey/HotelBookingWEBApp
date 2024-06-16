@@ -1,33 +1,49 @@
 ﻿@model HotelBookingApp.Models.HotelListViewModel
 
-<div class="row">
-    @if (Model.Hotels.Any())
-    {
-        @foreach (var hotel in Model.Hotels)
+<div class="container">
+    <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+        <h6 class="section-title text-center text-primary text-uppercase">Our Hotels</h6>
+        <h1 class="mb-5">Explore Our <span class="text-primary text-uppercase">Hotels</span></h1>
+    </div>
+    <div class="row g-4">
+        @if (Model.Hotels.Any())
         {
-            <div class="col-md-4 mb-3">
-                <div class="card hotel-card">
-                    <div class="image-container">
-                        <img class="card-img-top" src="data:image;base64,@hotel.Picture" alt="Hotel Image" />
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">@hotel.Name</h5>
-                        <p class="card-text">@hotel.Location</p>
-                        <p class="card-text">Rating: @hotel.Rating</p>
-                        <a asp-controller="Booking" asp-action="Create" asp-route-hotelId="@hotel.Id" class="btn btn-primary">Check Availability</a>
+            @foreach (var hotel in Model.Hotels)
+            {
+                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="room-item shadow rounded overflow-hidden">
+                        <div class="image-container position-relative">
+                            <img class="img-fluid" src="data:image;base64,@hotel.Picture" alt="Hotel Image" />
+@*                             <small class="card-title position-absolute start-0 top-100 translate-middle-y bg-primary text-white rounded py-1 px-3 ms-4">@hotel.Rating</small>
+ *@
+                        </div>
+                        <div class="card-body p-4 mt-2">
+                            <div class="d-flex justify-content-between mb-3">
+                                <h5 class="card-title">@hotel.Name</h5>
+                                <small><i class="fa fa-wifi text-primary me-2"></i>Wifi</small>
+
+                            </div>
+                            <div class="dp-flex mb-3">
+                                <small class="card-text border-end me-3 pe-3"><i class="fa fa-map-marker-alt me-3"></i>@hotel.Location</small>
+                                <small class="card-text border-end me-3 pe-3"><i class="fa fa-star text-primary"></i>(@hotel.Rating)</small>
+
+                            </div>
+
+                            <a asp-controller="Booking" asp-action="Create" asp-route-hotelId="@hotel.Id" class="btn btn-primary">Check Availability</a>
+                        </div>
                     </div>
                 </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <p class="text-center">No Hotels Found.</p>
             </div>
         }
-    }
-    else
-    {
-        <div class="col-12">
-            <p class="text-center">No Hotels Found.</p>
-        </div>
-    }
-</div>
 
+    </div>
+</div>
 <!-- Pagination -->
 @if (Model.TotalPages > 1)
 {
@@ -58,3 +74,4 @@
         </ul>
     </nav>
 }
+
