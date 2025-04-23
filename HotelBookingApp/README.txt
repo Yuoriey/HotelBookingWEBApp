@@ -1,4 +1,4 @@
-﻿
+This project uses Couchbase as its database which is a NoSQL Database.﻿
 
 Guide for the Couchbase Server.
 Name the Buckets, Scope, and Collections same as below!
